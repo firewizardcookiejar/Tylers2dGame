@@ -55,7 +55,7 @@ public class Player extends Entity{
 	
 		public void update()	{
 			
-			if(keyH.upPressed == true || keyH.downPressed == true || 
+			if(keyH.upPressed == true || keyH.downPressed == true || //idle animation currently none 
 					keyH.leftPressed == true || keyH.rightPressed == true)	{
 				if(keyH.upPressed == true) {
 					direction = "up";
@@ -77,10 +77,10 @@ public class Player extends Entity{
 					x += speed; 
 				}
 				
-				spriteCounter++;
-				if(spriteCounter > 25)	{
+				spriteCounter++;  //how fast the animation is for player sprite
+				if(spriteCounter > 10)	{ 
 					if(spriteNum == 1)	{
-						spriteNum =2;
+						spriteNum = 2;
 					}
 					else if(spriteNum == 2)	{
 						spriteNum = 1;
