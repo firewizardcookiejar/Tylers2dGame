@@ -2,6 +2,7 @@ package entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.*;
@@ -15,6 +16,10 @@ public class Player extends Entity{
 	
 	GamePanel gp;
 	KeyHandler keyH;
+
+	public final int screenX;
+	public final int screenY;
+	public int hasKey = 0;
 	
 	
 
@@ -22,6 +27,18 @@ public class Player extends Entity{
 		
 		this.gp = gp;
 		this.keyH = keyH;
+
+		screenX = gp.screenWidth/2 - (gp.tileSize/2); //draws character in center
+		screenY = gp.screenHeight/2 - (gp.tileSize/2);
+
+		solidArea = new Rectangle();
+		solidArea.x = 8;
+		solidArea.y = 16;
+		solidAreaDefaultX = solidArea.x;
+		solidAreaDefaultY = solidArea.y;
+		solidArea.width = 32;
+		solidArea.height = 32;
+
 		setDefaultValues();
 		getPlayerImage();
 		
@@ -29,8 +46,8 @@ public class Player extends Entity{
 	}
 	public void setDefaultValues()		{
 		
-		x = 100;
-		y= 100;
+		worldX = gp.tileSize * 8;
+		worldY = gp.tileSize * 23;
 		speed = 4;
 		direction = "down";
 		
@@ -40,9 +57,9 @@ public class Player extends Entity{
 		try	{
 			
 			up1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_up_1.png"));
-			up2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_up_2.png"));
+			up2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_up_3.png"));
 			down1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_down_1.png"));
-			down2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_down_2.png"));
+			down2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_down_3.png"));
 			left1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_left_1.png"));
 			left2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_left_2.png"));
 			right1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_right_1.png"));
@@ -59,22 +76,44 @@ public class Player extends Entity{
 					keyH.leftPressed == true || keyH.rightPressed == true)	{
 				if(keyH.upPressed == true) {
 					direction = "up";
-					y -= speed;
-					
 				}
 				else if(keyH.downPressed == true) {
 					direction = "down";
-					y += speed;
-					
 				}
 				else if(keyH.leftPressed == true) {
 					direction = "left";
-					x -= speed;
-					
 				}
 				else if(keyH.rightPressed == true) {
 					direction = "right";
-					x += speed; 
+				}
+
+				//tile collssion
+				collisionOn = false;
+				gp.cChecker.checkTile(this);
+
+				//check  obj collision
+				int objIndex = gp.cChecker.checkObject(this, true);
+				pickUpObject(objIndex);
+
+				if(collisionOn == false){
+					switch(direction){
+						case "up":
+						worldY -= speed;
+							break;
+
+						case "down":
+						worldY += speed;
+							break;
+
+						case "left":
+						worldX -= speed;
+							break;
+
+						case "right":
+							worldX += speed; 
+							break;
+							
+					}
 				}
 				
 				spriteCounter++;  //how fast the animation is for player sprite
@@ -88,9 +127,40 @@ public class Player extends Entity{
 					spriteCounter = 0;
 				}
 			}
+
+
 			
 			
 		}
+		public void pickUpObject(int i){
+
+			if(i != 727){
+				String objectName = gp.obj[i].name;
+
+				switch(objectName){
+				case "Key":
+					gp.playSE(2);
+					hasKey++;
+					gp.obj[i] = null;
+					break;
+
+				case "Door":
+					gp.playSE(1);
+					if(hasKey > 0){
+						gp.obj[i] = null;
+						hasKey--;
+					}
+					break;
+				case "Mask":
+					gp.playSE(3);
+					speed += 3;
+					gp.obj[i] = null;
+
+
+				}
+			}
+		}
+
 		public void draw(Graphics2D g2)	{
 			
 //			g2.setColor(Color.yellow);
@@ -133,7 +203,8 @@ public class Player extends Entity{
 				}
 				break;
 			}
-			g2.drawImage(image,  x,  y,  gp.tileSize, gp.tileSize, null);
+			g2.drawImage(image,  screenX,  screenY,  gp.tileSize, gp.tileSize, null);
+			
 		}
 		
 }
