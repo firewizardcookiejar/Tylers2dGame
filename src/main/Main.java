@@ -8,7 +8,7 @@ public class Main {
 		JFrame window = new JFrame();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setResizable(false);
-		window.setTitle("Noodles Day Off");
+		window.setTitle("Feed the witch please");
 		
 		GamePanel gamePanel = new GamePanel();
 		window.add(gamePanel);

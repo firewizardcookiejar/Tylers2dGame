@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 
 import main.GamePanel;
 import main.KeyHandler;
+import main.UtilityTool;
 
 public class Player extends Entity{
 	
@@ -20,6 +21,7 @@ public class Player extends Entity{
 	public final int screenX;
 	public final int screenY;
 	public int hasKey = 0;
+	int idleCounter = 0;
 	
 	
 
@@ -54,20 +56,30 @@ public class Player extends Entity{
 	}
 	public void getPlayerImage()	{
 		
-		try	{
-			
-			up1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_up_1.png"));
-			up2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_up_3.png"));
-			down1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_down_1.png"));
-			down2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_down_3.png"));
-			left1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_left_1.png"));
-			left2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_left_2.png"));
-			right1 = ImageIO.read(getClass().getResourceAsStream("/player/witch_right_1.png"));
-			right2 = ImageIO.read(getClass().getResourceAsStream("/player/witch_right_2.png"));
-			
-		}catch(IOException e)	{
+		up1 = setup("witch_up_1");
+		up2 = setup("witch_up_3");
+		down1 = setup("witch_down_1");
+		down2 = setup("witch_down_3");
+		left1 = setup("witch_left_1");
+		left2 = setup("witch_left_2");
+		right1 = setup("witch_right_1");
+		right2 = setup("witch_right_2");
+		
+	}
+	public BufferedImage setup(String imageName){
+
+		UtilityTool uTool = new UtilityTool();
+		BufferedImage image = null;
+		
+		try{
+			image = ImageIO.read(getClass().getResourceAsStream("/player/" + imageName + ".png"));
+			image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+
+		}catch(IOException e){
 			e.printStackTrace();
+
 		}
+		return image;
 	}
 	
 		public void update()	{
@@ -127,6 +139,15 @@ public class Player extends Entity{
 					spriteCounter = 0;
 				}
 			}
+			else{
+				idleCounter++;
+
+				if(idleCounter == 20){
+					spriteNum = 2;
+					idleCounter = 0;
+				}
+				
+			}
 
 
 			
@@ -146,8 +167,9 @@ public class Player extends Entity{
 					break;
 
 				case "Door":
-					gp.playSE(1);
+					
 					if(hasKey > 0){
+						gp.playSE(1);
 						gp.obj[i] = null;
 						gp.ui.showMessage("Opened a door!");
 						hasKey--;
@@ -220,7 +242,10 @@ public class Player extends Entity{
 				}
 				break;
 			}
-			g2.drawImage(image,  screenX,  screenY,  gp.tileSize, gp.tileSize, null);
+			g2.drawImage(image,  screenX,  screenY, null);
+
+			//g2.setColor(Color.blue);	used to show player hitbox uncomment to see :)
+			//g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, + solidArea.height);
 			
 		}
 		
