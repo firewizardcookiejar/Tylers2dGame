@@ -15,24 +15,23 @@ import main.UtilityTool;
 
 public class Player extends Entity{
 	
-	GamePanel gp;
+	
 	KeyHandler keyH;
-
 	public final int screenX;
 	public final int screenY;
-	public int hasKey = 0;
 	int idleCounter = 0;
 	
 	
 
 	public Player(GamePanel gp, KeyHandler keyH)	{
 		
-		this.gp = gp;
+		super(gp);
 		this.keyH = keyH;
 
 		screenX = gp.screenWidth/2 - (gp.tileSize/2); //draws character in center
 		screenY = gp.screenHeight/2 - (gp.tileSize/2);
 
+		//hitbox parameters
 		solidArea = new Rectangle();
 		solidArea.x = 8;
 		solidArea.y = 16;
@@ -56,30 +55,33 @@ public class Player extends Entity{
 	}
 	public void getPlayerImage()	{
 		
-		up1 = setup("witch_up_1");
-		up2 = setup("witch_up_3");
-		down1 = setup("witch_down_1");
-		down2 = setup("witch_down_3");
-		left1 = setup("witch_left_1");
-		left2 = setup("witch_left_2");
-		right1 = setup("witch_right_1");
-		right2 = setup("witch_right_2");
+	 /* up1 = setup("nasus_up_1");
+		up2 = setup("nasus_up2");
+		//up3 = setup("nasus_up3");
+		down1 = setup("nasus_down1");
+		down2 = setup("nasus_down2");
+		//down3 = setup("nasus_down3");
+		left1 = setup("nasus_left1");
+		left2 = setup("nasus_left2");
+		right1 = setup("nasus_right1");
+		right2 = setup("nasus_right2");
+	*/
+	//down1 = setup("gmoney_down_3");
+		//down2 = setup("gmoney_down2");	
+		//down2 = setup("gmoney_down_1");
+		up1 = setup("/player/witch_up_1");
+		up2 = setup("/player/witch_up_3");
+		down1 = setup("/player/witch_down_1");
+	
+		down2 = setup("/player/witch_down_3");
+	
+		left1 = setup("/player/witch_left_1");
+		left2 = setup("/player/witch_left_2");
+		right1 = setup("/player/witch_right_1");
+		right2 = setup("/player/witch_right_2");
+
+
 		
-	}
-	public BufferedImage setup(String imageName){
-
-		UtilityTool uTool = new UtilityTool();
-		BufferedImage image = null;
-		
-		try{
-			image = ImageIO.read(getClass().getResourceAsStream("/player/" + imageName + ".png"));
-			image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
-
-		}catch(IOException e){
-			e.printStackTrace();
-
-		}
-		return image;
 	}
 	
 		public void update()	{
@@ -106,6 +108,11 @@ public class Player extends Entity{
 				//check  obj collision
 				int objIndex = gp.cChecker.checkObject(this, true);
 				pickUpObject(objIndex);
+
+				//check npc collision
+				int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+				interactNPC(npcIndex);
+
 
 				if(collisionOn == false){
 					switch(direction){
@@ -156,48 +163,17 @@ public class Player extends Entity{
 		public void pickUpObject(int i){
 
 			if(i != 727){
-				String objectName = gp.obj[i].name;
+			}
+		}
+		public void interactNPC(int i){
+			if(i != 727){
 
-				switch(objectName){
-				case "Key":
-					gp.playSE(2);
-					hasKey++;
-					gp.obj[i] = null;
-					gp.ui.showMessage("Key get!");
-					break;
-
-				case "Door":
-					
-					if(hasKey > 0){
-						gp.playSE(1);
-						gp.obj[i] = null;
-						gp.ui.showMessage("Opened a door!");
-						hasKey--;
-					}else{
-						gp.ui.showMessage("You have no key dipshit");
-					}
-					break;
-				case "Mask":
-					gp.playSE(3);
-					speed += 3;
-					gp.obj[i] = null;
-					gp.ui.showMessage("Speed boost!");
-					break;
-				case "Chest":
-				if(hasKey > 0){
-						gp.obj[i] = null;
-						gp.ui.gameFinished = true;
-						gp.stopMusic();
-						gp.playSE(3);
-						hasKey--;
-					}else{
-						gp.ui.showMessage("You have no key dipshit");
-					}
-					break;
-
-
+				if(gp.keyH.enterPressed == true){
+					gp.gameState = gp.dialogueState;
+					gp.npc[i].speak();					
 				}
 			}
+			gp.keyH.enterPressed = false;
 		}
 
 		public void draw(Graphics2D g2)	{
@@ -244,8 +220,8 @@ public class Player extends Entity{
 			}
 			g2.drawImage(image,  screenX,  screenY, null);
 
-			//g2.setColor(Color.blue);	used to show player hitbox uncomment to see :)
-			//g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, + solidArea.height);
+			g2.setColor(Color.blue);	//used to show player hitbox uncomment to see :)
+			g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, + solidArea.height);
 			
 		}
 		
